@@ -6,11 +6,10 @@
 #SBATCH --job-name=decode
 #SBATCH --output=./log_decode/%j-decoder
 
-eval_dir=/project/ocean/tsriniva/Flickr8k-Audio/emnlp_experiments/eval_scripts/
 
-folder_path = /project/ocean/tsriniva/MultimodalASR/                # CHANGE TO YOUR OWN PATH!
-
-feats_type=object
+folder_path=/project/ocean/tsriniva/MultimodalASR                # CHANGE TO YOUR OWN PATH!
+data_dir=${folder_path}/data
+#data_dir=/project/ocean/tsriniva/data_MultimodalASR
 
 ### SET model_name ACCORDING TO WHICHEVER MODLE YOU WANT TO USE
 # model_name=asr
@@ -26,20 +25,17 @@ data_type=randommask_augment
 
 
 ### SET decode_split to false if you are decoding the test split mentioned in the conf file of the trained model, to true otherwise
-decode_split=true
-# decode_split=false
+# decode_split=true
+decode_split=false
 
 ### USE THIS IF YOU WANT TO DECODE A MODEL YOU'VE TRAINED YOURSELF, ELSE UNCOMMENT THE SECOND-LAST LINE
-ckpt_dir=${folder_path}/src/conf/exp/asr-${data_type}/${model_name}-${data_type}
-ckpt=$(find ${ckpt_dir} | grep best.wer.ckpt)
-ckpt=$(readlink -f ${ckpt})
-#ckpt=${folder_path}/models/flickr_trained_models/traindata_${data_type}/${model_name}.ckpt
+# ckpt_dir=${folder_path}/src/conf/exp/asr-${data_type}/${model_name}-${data_type}
+# ckpt=$(find ${ckpt_dir} | grep best.wer.ckpt)
+# ckpt=$(readlink -f ${ckpt})
+ckpt=${data_dir}/models/flickr_trained_models/traindata_${data_type}/${model_name}.ckpt
 echo ${ckpt}
 
-data_dir=${folder_path}/data
 
-### ACTIVATE NMTPY ENVIRONMENT
-source /home/tsriniva/anaconda2/bin/activate nmtpy
 
 if [ "$decode_split" = true ]; then
 
@@ -50,11 +46,11 @@ if [ "$decode_split" = true ]; then
         for dataset in ${split}_silence_nouns ${split}_silence_verbs ${split}_silence_places ${split}_silence_adjectives ${split}_silence_colors ${split}_silence_adverbs ${split}_silence_cardinals 
         #for dataset in ${split}_randommask_clean ${split}_randommask_20perc ${split}_randommask_40perc ${split}_randommask_60perc
         do
-            speech_dir = ${data_dir}/fbank_feats/data/${dataset}
+            speech_dir=${data_dir}/fbank_feats/data/${dataset}
 
             if [ "$multimodal" = true]; then
-                #feats_path=/project/ocean/tsriniva/Flickr8k-Audio/data/images/object_feats/${split}-resnet50-avgpool-r224-c224.npy     # UNCOMMENT IF model_name=mag
-                feats_path=/project/ocean/tsriniva/Flickr8k-Audio/data/images/bounding_boxes/${split}_bboxes.txt                        # UNCOMMENT IF model_name=maop
+                #feats_path=#{data_dir}/visual_feats/global_feats/${split}-resnet50-avgpool-r224-c224.npy     # UNCOMMENT IF model_name=mag
+                feats_path=${data_dir}/visual_feats/proposal_feats/${split}_bboxes.txt                        # UNCOMMENT IF model_name=maop
             fi
 
             if [ "$multimodal" = true ]; then
